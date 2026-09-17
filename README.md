@@ -48,3 +48,11 @@ POST /rides/1/reservations
   "passengerId": 2
 }
 ```
+
+# PRINTS
+
+<img width="1439" height="477" alt="image" src="https://github.com/user-attachments/assets/66bba823-c9c3-4fde-9b49-2853b30fef2a" />
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/6bc0da6c-d3b4-40c6-b752-e96a1b2ba634" />
+
+
