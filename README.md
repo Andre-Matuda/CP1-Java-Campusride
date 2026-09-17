@@ -2,9 +2,9 @@
 
 
 # INTEGRANTES
-  RM-566733 Andre Sousa Matuda
-  RM-567618 Paulo Henrique Muniz Diecrich
-  RM-566842 Guilherme Oliveira Feitosa
+  - RM-566733 Andre Sousa Matuda
+  - RM-567618 Paulo Henrique Muniz Diecrich
+  - RM-566842 Guilherme Oliveira Feitosa
 API REST para publicar caronas e reservar vagas.
 
 ## Como executar
