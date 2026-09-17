@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusRide - Teste da API</title>
+  <style>
+    :root { --blue: #2563eb; --dark: #172033; --bg: #f4f7fb; --line: #dbe3ef; --red: #dc2626; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--dark); font-family: Arial, sans-serif; }
+    header { background: linear-gradient(135deg, #172033, #2563eb); color: white; padding: 32px 20px; }
+    header div, main { max-width: 1050px; margin: auto; }
+    h1 { margin: 0 0 8px; } p { line-height: 1.5; }
+    main { padding: 24px 20px 48px; }
+    .grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
+    .card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: 0 4px 14px #1720330d; }
+    h2, h3 { margin-top: 0; } label { display: block; font-size: 14px; font-weight: bold; margin: 13px 0 5px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #b8c4d5; border-radius: 7px; font: inherit; }
+    button { border: 0; border-radius: 7px; background: var(--blue); color: white; cursor: pointer; font: inherit; font-weight: bold; padding: 10px 14px; margin-top: 16px; }
+    button:hover { filter: brightness(.92); } button.secondary { background: #64748b; } button.danger { background: var(--red); }
+    #message { display: none; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; }
+    #message.success { display: block; background: #dcfce7; color: #166534; }
+    #message.error { display: block; background: #fee2e2; color: #991b1b; }
+    .ride { border-top: 1px solid var(--line); padding: 16px 0; }
+    .ride:first-child { border-top: 0; padding-top: 0; }.ride-title { font-size: 18px; font-weight: bold; }
+    .tag { display: inline-block; border-radius: 99px; background: #dbeafe; color: #1d4ed8; font-size: 12px; font-weight: bold; padding: 4px 8px; margin: 8px 4px 0 0; }
+    .actions button { margin-right: 8px; }.details { background: #f8fafc; border-radius: 8px; margin-top: 12px; padding: 12px; }
+    .reservation { display: flex; gap: 8px; align-items: end; margin-top: 10px; }.reservation input { width: 120px; }.reservation button { margin: 0; }
+    .empty { color: #64748b; text-align: center; padding: 28px; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header><div><h1>CampusRide</h1><p>Área simples para testar os endpoints da sua API.</p></div></header>
+  <main>
+    <div id="message"></div>
+    <div class="grid">
+      <section class="card">
+        <h2>Publicar carona</h2>
+        <form id="ride-form">
+          <label for="driverId">ID do motorista</label>
+          <input id="driverId" type="number" min="1" required>
+          <label for="origin">Origem</label>
+          <input id="origin" required placeholder="Ex.: FIAP Paulista">
+          <label for="destiny">Destino</label>
+          <input id="destiny" required placeholder="Ex.: Metrô Trianon-Masp">
+          <label for="departureTime">Data e hora de partida</label>
+          <input id="departureTime" type="datetime-local" required>
+          <label for="vehicleType">Veículo</label>
+          <select id="vehicleType"><option value="CAR">Carro</option><option value="MOTORCYCLE">Moto</option></select>
+          <label for="totalSeats">Quantidade de vagas</label>
+          <input id="totalSeats" type="number" min="1" required>
+          <button type="submit">Publicar carona</button>
+        </form>
+      </section>
+      <section class="card">
+        <h2>Caronas abertas</h2>
+        <button class="secondary" onclick="loadRides()">Atualizar lista</button>
+        <div id="rides" class="empty">Clique em “Atualizar lista” para consultar a API.</div>
+      </section>
+    </div>
+  </main>
+  <script>
+    const message = document.getElementById('message');
+    const ridesElement = document.getElementById('rides');
+
+    function showMessage(text, type = 'success') {
+      message.textContent = text;
+      message.className = type;
+    }
+
+    async function request(url, options = {}) {
+      const response = await fetch(url, options);
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.message || 'Não foi possível concluir a operação.');
+      return body;
+    }
+
+    document.getElementById('ride-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const data = {
+        driverId: Number(driverId.value), origin: origin.value, destiny: destiny.value,
+        departureTime: departureTime.value, vehicleType: vehicleType.value,
+        totalSeats: Number(totalSeats.value)
+      };
+      try {
+        await request('/rides', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+        event.target.reset();
+        showMessage('Carona publicada com sucesso.');
+        loadRides();
+      } catch (error) { showMessage(error.message, 'error'); }
+    });
+
+    async function loadRides() {
+      try {
+        const rides = await request('/rides');
+        if (!rides.length) { ridesElement.innerHTML = '<div class="empty">Nenhuma carona aberta.</div>'; return; }
+        ridesElement.innerHTML = rides.map(ride => `
+          <article class="ride" id="ride-${ride.id}">
+            <div class="ride-title">${ride.origin} → ${ride.destiny}</div>
+            <div>${new Date(ride.departureTime).toLocaleString('pt-BR')}</div>
+            <span class="tag">${ride.vehicleType}</span><span class="tag">${ride.availableSeats} vaga(s)</span>
+            <div class="actions"><button onclick="showDetails(${ride.id})">Detalhes</button><button class="danger" onclick="cancelRide(${ride.id})">Cancelar</button></div>
+            <div class="reservation"><input id="passenger-${ride.id}" type="number" min="1" placeholder="ID passageiro"><button onclick="createReservation(${ride.id})">Reservar</button></div>
+            <div class="details" id="details-${ride.id}" hidden></div>
+          </article>`).join('');
+      } catch (error) { showMessage(error.message, 'error'); }
+    }
+
+    async function showDetails(id) {
+      try {
+        const ride = await request(`/rides/${id}`);
+        const reservations = ride.reservations.length ? ride.reservations.map(r => `<li>Passageiro ${r.passengerId}: ${r.status} <button class="danger" onclick="cancelReservation(${r.id})">Cancelar reserva</button></li>`).join('') : '<li>Nenhuma reserva.</li>';
+        const details = document.getElementById(`details-${id}`);
+        details.innerHTML = `<strong>Status: ${ride.status}</strong><br>Vagas: ${ride.availableSeats}/${ride.totalSeats}<br><strong>Reservas:</strong><ul>${reservations}</ul>`;
+        details.hidden = false;
+      } catch (error) { showMessage(error.message, 'error'); }
+    }
+
+    async function createReservation(rideId) {
+      const passengerId = Number(document.getElementById(`passenger-${rideId}`).value);
+      if (!passengerId) { showMessage('Informe o ID do passageiro.', 'error'); return; }
+      try {
+        await request(`/rides/${rideId}/reservations`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({passengerId}) });
+        showMessage('Reserva criada com sucesso.'); loadRides();
+      } catch (error) { showMessage(error.message, 'error'); }
+    }
+
+    async function cancelRide(id) {
+      if (!confirm('Deseja cancelar esta carona?')) return;
+      try { await request(`/rides/${id}/cancel`, {method: 'PATCH'}); showMessage('Carona cancelada.'); loadRides(); }
+      catch (error) { showMessage(error.message, 'error'); }
+    }
+
+    async function cancelReservation(id) {
+      if (!confirm('Deseja cancelar esta reserva?')) return;
+      try { await request(`/reservations/${id}/cancel`, {method: 'PATCH'}); showMessage('Reserva cancelada.'); loadRides(); }
+      catch (error) { showMessage(error.message, 'error'); }
+    }
+  </script>
+</body>
+</html>
