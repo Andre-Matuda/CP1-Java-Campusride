@@ -16,7 +16,7 @@
 .\mvnw.cmd spring-boot:run
 ```
 
-A API inicia em `http://localhost:8080`. O console do H2 fica em
+A API inicia em `http://localhost:8080/rides`. O console do H2 fica em
 `http://localhost:8080/h2-console`.
 
 ## Endpoints
