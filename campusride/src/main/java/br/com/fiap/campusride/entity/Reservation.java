@@ -1,13 +1,14 @@
 package br.com.fiap.campusride.entity;
 
-import br.com.fiap.campusride.entity.RideReservation;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
+@Entity
+@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -17,12 +18,21 @@ public class Reservation {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private RideReservation status = RideReservation.CANCELED;
+    @Builder.Default
+    private RideReservation status = RideReservation.CONFIRMED;
 
+    @ManyToOne
+    @JoinColumn(name = "ride_id")
     private Ride ride;
 
-    private Passenger passenger;
+    private Long passengerId;
 
     private LocalDateTime createdAt;
 
+    @PrePersist
+    void setCreatedAt() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }

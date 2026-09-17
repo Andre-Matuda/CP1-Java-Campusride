@@ -1,12 +1,12 @@
 package br.com.fiap.campusride.entity;
 
-import br.com.fiap.campusride.entity.RideSituation;
-import br.com.fiap.campusride.entity.VehicleType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.time.LocalDateTime;
 
@@ -34,4 +34,8 @@ public class Ride {
 
     @Enumerated(EnumType.STRING)
     private RideSituation status = RideSituation.OPEN;
+
+    @OneToMany(mappedBy = "ride")
+    private List<Reservation> reservations = new ArrayList<>();
+
 }
