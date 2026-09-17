@@ -1,20 +1,21 @@
 package br.com.fiap.campusride.dto;
 
 import br.com.fiap.campusride.entity.Ride;
+import br.com.fiap.campusride.entity.RideSituation;
 import br.com.fiap.campusride.entity.VehicleType;
 
 import java.time.LocalDateTime;
 
 public record RideResponse(
         Long id,
-        Long driveId,
+        Long driverId,
         String origin,
         String destiny,
         LocalDateTime departureTime,
         Integer totalSeats,
-        VehicleType vehicleType
+        VehicleType vehicleType,
+        RideSituation status
 ) {
-
 
     public static RideResponse fromEntity(Ride ride) {
         return new RideResponse(
@@ -24,7 +25,8 @@ public record RideResponse(
                 ride.getDestiny(),
                 ride.getDepartureTime(),
                 ride.getTotalSeats(),
-                ride.getVehicleType()
+                ride.getVehicleType(),
+                ride.getStatus()
         );
     }
 }

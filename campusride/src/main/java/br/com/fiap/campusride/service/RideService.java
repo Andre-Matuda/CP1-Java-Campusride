@@ -20,6 +20,9 @@ public class RideService {
     }
 
     public Ride create(Ride ride) {
+        if (ride.getStatus() == null) {
+            ride.setStatus(RideSituation.PROGRESS);
+        }
         return rideRepository.save(ride);
     }
 
@@ -47,5 +50,27 @@ public class RideService {
         }
 
         return rideRepository.save(ride);
+    }
+
+    @Transactional
+    public Reservation reserveRide(Long rideId) {
+        Ride ride = findById(rideId);
+
+        if (ride.getStatus() != RideSituation.OPEN) {
+            throw new RuntimeException("Esta carona não está aceitando reservas no momento.");
+        }
+
+        if (ride.getReservations().size() >= ride.getTotalSeats()) {
+            throw new RuntimeException("Não há vagas disponíveis nesta carona.");
+        }
+
+        Reservation reservation = new Reservation();
+        reservation.setRide(ride);
+        reservation.setStatus(RideReservation.CONFIRMED);
+
+        ride.getReservations().add(reservation);
+        rideRepository.save(ride);
+
+        return reservation;
     }
 }

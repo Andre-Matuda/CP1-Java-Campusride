@@ -2,8 +2,6 @@ package br.com.fiap.campusride.controller;
 
 import br.com.fiap.campusride.dto.ReservationRequest;
 import br.com.fiap.campusride.dto.ReservationResponse;
-import br.com.fiap.campusride.dto.RideRequest;
-import br.com.fiap.campusride.entity.Ride;
 import br.com.fiap.campusride.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +23,5 @@ public class ReservationController {
     @PatchMapping("/reservations/{id}/cancel")
     public ReservationResponse cancel(@PathVariable Long id) {
         return reservationService.cancel(id);
-    }
-
-    public Ride create(@Valid @RequestBody RideRequest request) {
-        return null;
     }
 }

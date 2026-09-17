@@ -1,8 +1,6 @@
 package br.com.fiap.campusride.dto;
 
-import br.com.fiap.campusride.entity.Ride;
 import br.com.fiap.campusride.entity.VehicleType;
-import br.com.fiap.campusride.validation.ValidVehicleSeats;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -10,11 +8,9 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
-@ValidVehicleSeats
 public record RideRequest(
-
-        @NotNull(message = "O motorista é obrigatório")
-        Long driverId,
+        @NotNull(message = "O ID do motorista não pode ser nulo")
+        Long driverId, // <-- Garanta que é Long maiúsculo
 
         @NotBlank(message = "A origem não pode estar em branco")
         String origin,
@@ -22,28 +18,16 @@ public record RideRequest(
         @NotBlank(message = "O destino não pode estar em branco")
         String destiny,
 
-        @NotNull(message = "O horário de partida é obrigatório")
-        @Future(message = "O horário de partida deve ser uma data e hora futura")
+        @NotNull(message = "A data de partida é obrigatória")
+        @Future(message = "A data de partida deve ser no futuro")
         LocalDateTime departureTime,
 
         @NotNull(message = "O tipo de veículo é obrigatório")
         VehicleType vehicleType,
 
-        @NotNull(message = "A quantidade de vagas é obrigatória")
-        @Min(value = 1, message = "A carona deve ter ao menos 1 vaga")
+        @NotNull(message = "O total de assentos é obrigatório")
+        @Min(value = 1, message = "Deve haver pelo menos 1 assento")
         Integer totalSeats
-
 ) {
 
-    public Ride toEntity() {
-        return Ride.builder()
-                .driverId(driverId)
-                .origin(origin)
-                .destiny(destiny)
-                .departureTime(departureTime)
-                .vehicleType(vehicleType)
-                .totalSeats(totalSeats)
-                .status(br.com.fiap.campusride.entity.RideSituation.OPEN)
-                .build();
-    }
 }
